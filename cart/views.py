@@ -1,0 +1,65 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib import messages
+from store.models import Product
+from .cart import Cart
+
+# Create your views here.
+def cart_summary(request):
+    #get the cart
+    cart = Cart(request)
+    #get products
+    cart_products = cart.get_prods()
+    #get quantities
+    quantities = cart.get_quants();
+    #preparing data
+    context = {
+        'cart_products' : cart_products,
+        'quantities' : quantities,
+    }
+    return render(request, 'cart/cart_summary.html', context)
+
+def cart_add(request):
+    #get the cart
+    cart = Cart(request)
+    #testing
+    if request.POST.get('action') == 'post':
+        product_id = int(request.POST.get('product_id'))
+        #Quantity
+        product_qty = int(request.POST.get('product_qty'))
+        #fetch product
+        product = get_object_or_404(Product, id=product_id)
+        #save to session
+        cart.add(product=product, quantity=product_qty)
+        #Now Calculate cart length 
+        cart_quantity = len(cart)
+        #messages.success(request, ('[ cart > add ] : You have successful added ' + product.name + ' with quantity ' + product_qty))
+        messages.success(request, ('Successful Added the product'))
+        #build response
+        response = JsonResponse({ 'qty' : cart_quantity })
+        return response
+    else:
+        messages.success(request, ('There were problem in adding a product'))
+        return JsonResponse({'error' : '707', 'errormessage' : 'Could not get a valid action'})
+
+def cart_delete(request):
+    pass
+
+def cart_update(request):
+    cart = Cart(request)
+
+    if request.POST.get('action') == 'post':
+        product_id = int(request.POST.get('product_id'))
+        product_qty = int(request.POST.get('product_qty'))
+        #update cart
+        cart.update(product=product_id, quantity=product_qty)
+        #messages
+        messages.success(request, ('An item was updated, successful'))
+        #build response
+        response = JsonResponse({ 'qty' : product_qty })
+        return response
+    else:
+        #messages
+        messages.success(request, ('Failed to update an item'))
+        #response
+        return JsonResponse({'error' : '707', 'errormessage' : 'Could not get a valid action'})

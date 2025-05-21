@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">Shopping Cart</h1>
+            <p class="lead fw-normal text-white-50 mb-0">View Your Cart</p>
+        </div>
+    </div>
+</header>
+<!-- Section-->
+<div class="container">
+    {% if cart_products %}
+    {% for product in cart_products %}
+    <!--Begin : Card-->
+    <div class="card mb-2 mt-2">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="{%if product.image %}{{ product.image.url }}{% endif %}" class="img-fluid rounded-start"
+                    alt="...">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <center>
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <br />
+                        {% if product.is_sale %}
+                        <!--Sales Information-->
+                        <div class="d-flex justify-content-center small text-warning mb-2">
+                            <div class="bi-star-fill"></div>
+                            &nbsp;&nbsp;Sale!&nbsp;&nbsp;
+                            <div class="bi-star-fill"></div>
+                        </div>
+                        <!-- Product price-->
+                        <strike>${{ product.price }}</strike> &nbsp;&nbsp;${{ product.sale_price }}&nbsp;&nbsp;
+                        {% else %}
+                        <!-- Product price-->
+                        ${{ product.price }}
+                        {% endif %}
+                        <br /><br />
+                        <div class="row justify-content-center">
+                            <div class="col-md-2">Quantity</div>
+                            <div class="col-md-2">
+                                <select id="select{{ product.id }}" class="form-select form-select-sm" aria-label="Product Quantity">
+                                    {% for key, value in quantities.items %}
+                                        {% if key == product.id|slugify %}
+                                            <option value="{{ value }}">{{ value }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br />
+                        <p><small>In : {{ product.category }}</small></p>
+                        <br/>
+                        <small><i><a href="{% url 'store:home' %}" class="btn btn-secondary">Go to Home</a></i></small>
+                        &nbsp;&nbsp;
+                        <small><i><button type="button" data-index="{{ product.id }}" class="btn btn-secondary update-cart">Update</button></i></small>
+                        <br />
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End : Card-->
+    {% endfor %}
+    {% else %}
+    <br /><br /><br /><br />
+    <div class="alert alert-warning" role="alert">
+        You have nothing in your cart!!!!
+    </div>
+    <br /><br /><br /><br />
+    {% endif %}
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    (function ($) {
+        $(function () {
+            $(document).on('click', '.update-cart', function (e) {
+                e.preventDefault();
+                var productid = $(this).data('index');
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "cart:cart_update" %}',
+                    data: {
+                        product_id: productid,
+                        product_qty: $('#select' + productid + ' option:selected').val(),
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        action: 'post'
+                    },
+                    success: function (json) {
+                        window.location.reload();
+                    },
+                    error: function (xhr, errmsg, err) { 
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+    })(jQuery);
+</script>
+{% endblock %}

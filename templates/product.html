@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <br /><br />
+    <!--Begin : Card-->
+    <div class="card mb-3">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="{%if product.image %}{{ product.image.url }}{% endif %}" class="img-fluid rounded-start"
+                    alt="...">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <center>
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <br />
+                        {% if product.is_sale %}
+                        <!--Sales Information-->
+                        <div class="d-flex justify-content-center small text-warning mb-2">
+                            <div class="bi-star-fill"></div>
+                            &nbsp;&nbsp;Sale!&nbsp;&nbsp;
+                            <div class="bi-star-fill"></div>
+                        </div>
+                        <!-- Product price-->
+                        <strike>${{ product.price }}</strike> &nbsp;&nbsp;${{ product.sale_price }}&nbsp;&nbsp;
+                        {% else %}
+                        <!-- Product price-->
+                        ${{ product.price }}
+                        {% endif %}
+                        <br /><br />
+                        <div class="row justify-content-center">
+                            <div class="col-md-2">Quantity</div>
+                            <div class="col-md-2">
+                                <select id="qty-cart" class="form-select form-select-sm" aria-label="Product Quantity">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br />
+                        <p><small>In : {{ product.category }}</small></p>
+                        <br />
+                        <small><i><a href="{% url 'store:home' %}" class="btn btn-secondary">Go to Home</a></i></small>
+                        &nbsp;&nbsp;
+                        <small><i><button class="btn btn-secondary" type="button" value="{{product.id}}"
+                                    id="add-cart">Add To Cart</button></i></small>
+                        <br />
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End : Card-->
+    <br /><br />
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    (function ($) {
+        $(function () {
+            $(document).on('click', '#add-cart', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "cart:cart_add" %}',
+                    data: {
+                        product_id: $(this).val(),
+                        product_qty: $('#qty-cart option:selected').val(),
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        action: 'post'
+                    },
+                    success: function (json) {
+                        document.getElementById('cart_quantity').textContent = json.qty;
+                        window.location.href = '{% url "store:home" %}';
+                    },
+                    error: function (xhr, errmsg, err) {
+                        window.location.href = '{% url "store:home" %}';
+                     }
+                });
+            });
+        });
+    })(jQuery);
+</script>
+{% endblock %}
