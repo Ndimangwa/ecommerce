@@ -31,6 +31,14 @@ class Cart():
         self.session.modified = True 
         #Not necessary to return
         return self.cart
+    
+    def delete(self, product):
+        product_id = str(product)
+        if product_id in self.cart:
+            del self.cart[product_id]
+            self.session.modified = True
+        else:
+            pass
 
     def __len__(self):
         return len(self.cart)

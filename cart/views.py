@@ -43,7 +43,22 @@ def cart_add(request):
         return JsonResponse({'error' : '707', 'errormessage' : 'Could not get a valid action'})
 
 def cart_delete(request):
-    pass
+    cart = Cart(request)
+    if request.POST.get('action') == 'post':
+        cart = Cart(request)
+        product_id = int(request.POST.get('product_id'))
+        #Delete cart
+        cart.delete(product=product_id)
+        #messages
+        messages.success(request, ('An item was deleted, successful'))
+        #build response
+        response = JsonResponse({ 'product' : product_id })
+        return response
+    else:
+        #messages
+        messages.success(request, ('Failed to remove an item'))
+        #response
+        return JsonResponse({'error' : '808', 'errormessage' : 'Could not get a valid action'})
 
 def cart_update(request):
     cart = Cart(request)
