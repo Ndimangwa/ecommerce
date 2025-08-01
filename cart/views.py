@@ -12,10 +12,13 @@ def cart_summary(request):
     cart_products = cart.get_prods()
     #get quantities
     quantities = cart.get_quants();
+    #get totals
+    totals = cart.get_total()
     #preparing data
     context = {
         'cart_products' : cart_products,
         'quantities' : quantities,
+        'totals': totals,
     }
     return render(request, 'cart/cart_summary.html', context)
 

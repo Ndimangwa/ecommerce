@@ -61,8 +61,10 @@ def category(request, foo):
     #Replace the - with ' '
     foo = foo.replace('-', ' ')
     try:
+        # get return one item only
         category = Category.objects.get(name=foo)
-        products = Product.objects.get(category=category)
+        # filter returns multiple items
+        products = Product.objects.filter(category=category)
         context = {
             'products': products,
             'category': category,
@@ -71,3 +73,10 @@ def category(request, foo):
     except:
         messages.success(request, ('Category does not exists'))
         return redirect('store:home')
+
+def category_summary(request):
+    categories = Category.objects.all()
+    context = {
+        'categories': categories,
+    }
+    return render(request, 'category_summary.html', context)
