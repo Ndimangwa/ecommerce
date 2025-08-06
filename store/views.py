@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Product, Category
-from .forms import SignUpForm
+from .forms import SignUpForm, UpdateUserForm
 # Create your views here.
 def home(request):
     products = Product.objects.all()
@@ -10,6 +11,20 @@ def home(request):
 
 def about(request):
     return render(request, 'about.html', {})
+
+def update_user(request):
+    if request.user.is_authenticated:
+        current_user = User.objects.get(id=request.user.id)
+        user_form = UpdateUserForm(request.POST or None, instance=current_user)
+        if user_form.is_valid():
+            user_form.save()
+            login(request, current_user)
+            messages.success(request, ('User has been updated'))
+            return redirect('store:home')
+        return render(request, 'update_user.html', {'user_form':user_form})
+    else:
+        messages.success(request, ('you must be logged in to access the page'))
+        return redirect('store:home')
 
 def login_user(request):
     if request.method == "POST":
