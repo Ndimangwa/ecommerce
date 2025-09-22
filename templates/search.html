@@ -13,7 +13,26 @@
 <!-- Section-->
 <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
-        MY SEARCH UI
+        <div class="card">
+            <div class="card-header">
+                Search Products
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'store:search' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="searched" placeholder="Item to Search">
+                    </div>
+                    <div class="mb-3 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-secondary">Search Products</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </section>
-    {% endblock %}
+<section class="py-5">
+    <!--No need of testing product as the include test by itself-->
+    {% include 'product_list.html' %}
+</section>
+{% endblock %}

@@ -4,12 +4,24 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Product, Category, Profile
 from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
+from django.db.models import Q
 # Create your views here.
 def home(request):
     products = Product.objects.all()
     return render(request, 'home.html', {'products' : products})
 
 def search(request):
+    #determine if form filled
+    if request.method == "POST":
+        searched = request.POST['searched']
+        #Query products
+        products = Product.objects.filter(Q(name__icontains=searched) | Q(description__icontains=searched))
+        #Test for Null
+        if not products:
+            messages.success(request, ('Product ', searched, ' is not found'))
+            return redirect('store:search')
+        else:
+            return render(request, 'search.html', {'products' : products})
     return render(request, 'search.html', {})
 
 def about(request):
