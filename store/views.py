@@ -2,15 +2,54 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Product, Category
-from .forms import SignUpForm, UpdateUserForm
+from .models import Product, Category, Profile
+from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
 # Create your views here.
 def home(request):
     products = Product.objects.all()
     return render(request, 'home.html', {'products' : products})
 
+def search(request):
+    return render(request, 'search.html', {})
+
 def about(request):
     return render(request, 'about.html', {})
+
+def update_info(request):
+    if request.user.is_authenticated:
+        current_user_profile = Profile.objects.get(user__id=request.user.id)
+        form = UserInfoForm(request.POST or None, instance=current_user_profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, ('Congratulations!!!!! You have updated your user info successfully!!!!!'))
+            return redirect('store:home')
+        return render(request, 'update_info.html', {'form':form})
+    else:
+        messages.success(request, ('you must be logged in to access the page'))
+        return redirect('store:home')
+
+def update_password(request):
+    #Check if user is logged in
+    if request.user.is_authenticated:
+        current_user = request.user
+        #Did they fill the form
+        if request.method == 'POST':
+            form = ChangePasswordForm(current_user, request.POST)
+            #is form filled properly?
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'You have successful updated the password, please log in again')
+                return redirect('store:login')
+            else:
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
+                return redirect('store:update_password')
+        else:
+            form = ChangePasswordForm(current_user)
+            return render(request, 'update_password.html', {'form' : form})
+    else:
+        messages.success(request, 'You must be logged in to access the requested page')
+        return redirect('store:home')
 
 def update_user(request):
     if request.user.is_authenticated:
@@ -56,8 +95,8 @@ def register_user(request):
             password = form.cleaned_data['password1']
             user = authenticate(username=username,password=password)
             login(request, user)
-            messages.success(request, ('Congratulations!!!!, You have registered successful, You have now logged-in into your account!!!!'))
-            return redirect('store:home')
+            messages.success(request, ('Wonderfully!!! Now you can proceed to update your info'))
+            return redirect('store:update_info')
         else:
             messages.success(request, ('Whoops!!!, kindly try again filling the form'))
             return redirect('store:register')
