@@ -5,6 +5,8 @@ from django.contrib import messages
 from .models import Product, Category, Profile
 from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
 from django.db.models import Q
+import json
+from cart.cart import Cart
 # Create your views here.
 def home(request):
     products = Product.objects.all()
@@ -84,6 +86,20 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            #Do some shopping staff
+            current_user = Profile.objects.get(user__id=request.user.id)
+            #Get their saved cart
+            saved_cart = current_user.old_cart
+            #Convert old string to python dictionary
+            if saved_cart:
+                #convert saved cart to dictionary using json
+                converted_cart = json.loads(saved_cart)
+                #Add the loaded cart to session
+                cart = Cart(request)
+                #Now you need to merge cart in session and the db cart
+                #Assume you had items in session prior logging
+                #While logging you need to merge with old cart
+                cart.merge_carts(converted_cart)
             messages.success(request, ('You have logged in'))
             return redirect('store:home')
         else:
