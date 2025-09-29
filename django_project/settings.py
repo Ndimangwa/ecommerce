@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     #My Local Apps
     'store.apps.StoreConfig',
     'cart.apps.CartConfig',
+    'payment.apps.PaymentConfig',
 ]
 
 MIDDLEWARE = [
