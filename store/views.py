@@ -7,6 +7,10 @@ from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
 from django.db.models import Q
 import json
 from cart.cart import Cart
+
+#Shipping Address and Payment
+from payment.models import ShippingAddress
+from payment.forms import ShippingForm
 # Create your views here.
 def home(request):
     products = Product.objects.all()
@@ -32,12 +36,20 @@ def about(request):
 def update_info(request):
     if request.user.is_authenticated:
         current_user_profile = Profile.objects.get(user__id=request.user.id)
+        #Get user_shipping_address
+        user_shipping_address = ShippingAddress.objects.get(user__id=request.user.id)
+        #Get user billing form
         form = UserInfoForm(request.POST or None, instance=current_user_profile)
-        if form.is_valid():
-            form.save()
+        #Get user shipping form
+        shipping_form = ShippingForm(request.POST or None, instance=user_shipping_address)
+        if form.is_valid() or shipping_form.is_valid():
+            if form.is_valid():
+                form.save()
+            if shipping_form.is_valid():
+                shipping_form.save()
             messages.success(request, ('Congratulations!!!!! You have updated your user info successfully!!!!!'))
             return redirect('store:home')
-        return render(request, 'update_info.html', {'form':form})
+        return render(request, 'update_info.html', {'form':form, 'shipping_form': shipping_form })
     else:
         messages.success(request, ('you must be logged in to access the page'))
         return redirect('store:home')
