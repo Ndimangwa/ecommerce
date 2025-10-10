@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 from store.models import Product
 
 # Create your models here.
@@ -21,6 +22,20 @@ class ShippingAddress(models.Model):
     def __str__(self):
         return f'Shipping Address - {str(self.id)}'
     
+#User -> ShippingAddress; When User is created on saved activate signal
+def create_shipping_address(sender, instance, created, **kwargs):
+    if created:
+        #User is Created
+        user_shipping = ShippingAddress.objects.create(user=instance)
+        user_shipping.save()
+        print(f"++++++++ Shipping Address for User : {instance.username} has been created successfull ++++++++")
+    else:
+        #User updated
+        print(f"++++++++ A User {instance.username} has been updated [ ShippingAddress has been signalled ] ++++++++")
+
+#Connecting now
+post_save.connect(create_shipping_address, sender=User)
+
 #Create Order
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

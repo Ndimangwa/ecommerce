@@ -24,6 +24,10 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         user_profile = Profile(user=instance)
         user_profile.save()
+        print(f"======== Profile for User : { instance.username } has been created successful ========")
+    else:
+        #Updated
+        print(f"======== User {instance.username} has been updated [Profile has been signalled] =======")
 
 #Automate the profile
 post_save.connect(create_profile, sender=User)

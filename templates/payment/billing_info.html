@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">Billing Info</h1>
+            <p class="lead fw-normal text-white-50 mb-0">Enter Your Payment Info</p>
+        </div>
+    </div>
+</header>
+<!-- Section-->
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <!--Order Summary-->
+            <div class="mt-5 px-5">
+                <div class="card">
+                    <div class="card-header">
+                        Order Summary
+                    </div>
+                    <div class="card-body">
+                        {% for product in cart_products %}
+                        {{ product.name }} :
+                        {% if product.is_sale %}
+                        {{ product.sale_price }}
+                        {% else %}
+                        {{ product.price }}
+                        {% endif %}
+                        <br />
+                        <small>Quantity:
+                            {% for key, value in quantities.items %}
+                            {% if key == product.id|slugify %}
+                            {{ value }}
+                            {% endif %}
+                            {% endfor %}
+                        </small>
+                        <br /><br />
+                        {% endfor %}
+                        <strong>Total: ${{ totals }}</strong>
+                        <br />
+                        <a href="{% url 'cart:cart_summary' %}" class="btn btn-sm btn-outline-secondary">Update
+                            Items</a>
+                    </div>
+                </div>
+            </div>
+            <!--Shipping Information-->
+            <div class="mt-5 mb-5 px-5">
+                <div class="card">
+                    <div class="card-header">
+                        Shipping Info
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td>Name</td>
+                                    <td>{{ shipping_info.shipping_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td>Email</td>
+                                    <td>{{ shipping_info.shipping_email }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td>Address 1</td>
+                                    <td>{{ shipping_info.shipping_address1 }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">4</th>
+                                    <td>Address 2</td>
+                                    <td>{{ shipping_info.shipping_address2 }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">5</th>
+                                    <td>City</td>
+                                    <td>{{ shipping_info.shipping_city }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">6</th>
+                                    <td>State</td>
+                                    <td>{{ shipping_info.shipping_state }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">7</th>
+                                    <td>Zipcode</td>
+                                    <td>{{ shipping_info.shipping_zipcode }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">8</th>
+                                    <td>Country</td>
+                                    <td>{{ shipping_info.shipping_country }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <a href="{% url 'payment:checkout' %}" class="btn btn-outline-secondary">Update Shipping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!--Billing Information-->
+            <div class="mt-5 mb-5 px-5">
+                <div class="card">
+                    <div class="card-header">
+                        Billing Info
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'payment:billing_info' %}">
+                            {% csrf_token %}
+                            {{ billing_form.as_p }}
+                            <br />
+                            <button type="submit" class="btn btn-secondary">Pay Now</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    (function ($) {
+        $(function () { });
+    })(jQuery);
+</script>
+{% endblock %}
