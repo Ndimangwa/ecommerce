@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">Order Details</h1>
+            <p class="lead fw-normal text-white-50 mb-0">Order Details ...</p>
+        </div>
+    </div>
+</header>
+<!--Section-->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <center>
+                <div class="col-8">
+                    <!--Begin : Put Your Stuff Here-->
+                    <div class="card">
+                        <div class="card-header">
+                            Order {{ order.id }} -- ${{ order.amount_paid }}
+                        </div>
+                        <div class="card-body">
+                            {% if items %}
+                            <!--General About Order-->
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    <tr>
+                                        <td>Email</td>
+                                        <td>{{ order.email }}</td>
+                                    </tr>
+                                    {% if order.shipped %}
+                                    <tr>
+                                        <td>Date Shipped</td>
+                                        <td>{{ order.date_shipped }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <td>Date Ordered</td>
+                                        <td>{{ order.date_ordered }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Full Name</td>
+                                        <td>{{ order.full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Shipping Address</td>
+                                        <td>{{ order.shipping_address }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <br />
+                            <!--List of OrderItems-->
+                            <div class="card">
+                                <div class="card-header bg-dark text-white">Products Ordered</div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        {% for item in items %}
+                                        <li class="list-group-item">{{ item.product }} -- {{ item.quantity }} -- ${{ item.price }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <br/>
+                            <!--Submit Button-->
+                            <form method="POST" action="{% url 'payment:update_shipping_status' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="num" value="{{ order.id }}"/>
+                                {% if not order.shipped %}
+                                <input type="hidden" name="shipping_status" value="true"/>
+                                <button type="submit" class="btn btn-success">Mark As Shipped</button>
+                                {% else %}
+                                <input type="hidden" name="shipping_status" value="false"/>
+                                <button type="submit" class="btn btn-danger">Mark As Not Shipped</button>
+                                {% endif %}
+                            </form>
+                            {% else %}
+                            <div class="alert alert-warning" role="alert">
+                                No Order Items Found
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!--End : Put Your Stuff Here-->
+                </div>
+            </center>
+        </div>
+    </div>
+</section>
+<!-- Section-->
+{% endblock %}

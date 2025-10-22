@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
+import datetime
 from store.models import Product
 
 # Create your models here.
@@ -44,9 +46,23 @@ class Order(models.Model):
     shipping_address = models.CharField(max_length=2047)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
     date_ordered = models.DateTimeField(auto_now_add=True)
+    shipped = models.BooleanField(default=False)
+    date_shipped = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f'Order -- {str(self.id)}'
+    
+#Now adding receiver decorator
+@receiver(pre_save, sender=Order)
+def set_shipped_date_on_update(sender, instance, **kwargs):
+    if instance.pk:
+        #This must be an update
+        #in update we have pk primary key in advance
+        #in creation we do not
+        now = datetime.datetime.now()
+        saved_obj = sender.objects.get(pk=instance.pk)
+        if instance.shipped and not saved_obj.shipped:
+            instance.date_shipped = now
 
 #Create Order Item
 class OrderItem(models.Model):
