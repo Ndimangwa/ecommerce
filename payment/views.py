@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from cart.cart import Cart
 #Local Imports
 from .models import ShippingAddress, Order, OrderItem
+from store.models import Profile
 from .forms import ShippingForm, PaymentForm
 from django.contrib import messages
 import datetime
@@ -202,6 +203,13 @@ def process_payment(request):
             if key == "session_key":
                 #delete the key
                 del request.session[key]
+        #We forgot items were saved permanetly in db
+        #in Profile.old_card
+        if request.user.is_authenticated:
+            current_user_profile = Profile.objects.get(user=request.user)
+            if current_user_profile:
+                current_user_profile.old_cart = ""
+                current_user_profile.save()
         #feedback
         messages.success(request, ('Order Placed Successful'))
         return redirect('store:home')
