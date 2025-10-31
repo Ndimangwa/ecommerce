@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
+from authorization.models import User
 from .models import Category, Customer, Product, Order, Profile
 
 # Register your models here.
@@ -20,6 +20,6 @@ class UserAdmin(admin.ModelAdmin):
     inlines=[ProfileInline]
 
 #Unregister old way
-admin.site.unregister(User)
+#admin.site.unregister(User)
 #Re-register a new way
 admin.site.register(User, UserAdmin)

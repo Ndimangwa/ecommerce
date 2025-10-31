@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.models import User
+from authorization.models import User
 from django.contrib import messages
 from .models import Product, Category, Profile
 from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm

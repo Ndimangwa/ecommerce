@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from authorization.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
 from django import forms 
 from .models import Profile
