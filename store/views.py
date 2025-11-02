@@ -7,6 +7,8 @@ from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
 from django.db.models import Q
 import json
 from cart.cart import Cart
+#Testing
+from authorization.authorize import Authorization
 
 #Shipping Address and Payment
 from payment.models import ShippingAddress
@@ -16,6 +18,7 @@ def home(request):
     products = Product.objects.all()
     return render(request, 'home.html', {'products' : products})
 
+@Authorization.authorize_server(name='product_search')
 def search(request):
     #determine if form filled
     if request.method == "POST":
@@ -143,7 +146,7 @@ def register_user(request):
     else:
         return render(request, 'register.html', {'form' : form })
     
-
+@Authorization.authorize_server(name='product_view')
 def product(request, pk):
     product = Product.objects.get(id=pk)
     context = {
