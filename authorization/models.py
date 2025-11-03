@@ -10,7 +10,7 @@ class ContextManager(models.Model):
 
 # ContextLookup
 class ContextLookup(models.Model):
-    symbol = models.CharField(max_length=1,null=False, blank=False, unique=True)
+    symbol = models.CharField(max_length=1,null=False, blank=False)
     cvalue = models.CharField(max_length=4, null=False, blank=False, unique=True)
     #A - 0000
     #B - 0001
