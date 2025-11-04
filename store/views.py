@@ -18,7 +18,7 @@ def home(request):
     products = Product.objects.all()
     return render(request, 'home.html', {'products' : products})
 
-@Authorization.authorize_server(name='product_search')
+@Authorization.authorize_server(name='search')
 def search(request):
     #determine if form filled
     if request.method == "POST":
@@ -33,9 +33,11 @@ def search(request):
             return render(request, 'search.html', {'products' : products})
     return render(request, 'search.html', {})
 
+@Authorization.authorize_server(name='about')
 def about(request):
     return render(request, 'about.html', {})
 
+@Authorization.authorize_server(name='update_info')
 def update_info(request):
     if request.user.is_authenticated:
         current_user_profile = Profile.objects.get(user__id=request.user.id)
@@ -57,6 +59,7 @@ def update_info(request):
         messages.success(request, ('you must be logged in to access the page'))
         return redirect('store:home')
 
+@Authorization.authorize_server(name='update_password')
 def update_password(request):
     #Check if user is logged in
     if request.user.is_authenticated:
@@ -80,6 +83,7 @@ def update_password(request):
         messages.success(request, 'You must be logged in to access the requested page')
         return redirect('store:home')
 
+@Authorization.authorize_server(name='update_user')
 def update_user(request):
     if request.user.is_authenticated:
         current_user = User.objects.get(id=request.user.id)
@@ -128,6 +132,7 @@ def logout_user(request):
     messages.success(request, ('You have been logged out successful!!!!'))
     return redirect('store:home')
 
+#Anonymous users are allowed to register
 def register_user(request):
     form = SignUpForm()
     if request.method == "POST":
@@ -146,7 +151,7 @@ def register_user(request):
     else:
         return render(request, 'register.html', {'form' : form })
     
-@Authorization.authorize_server(name='product_view')
+@Authorization.authorize_server(name='product')
 def product(request, pk):
     product = Product.objects.get(id=pk)
     context = {
@@ -154,6 +159,7 @@ def product(request, pk):
     }
     return render(request, 'product.html', context)
 
+@Authorization.authorize_server(name='category')
 def category(request, foo):
     #Replace the - with ' '
     foo = foo.replace('-', ' ')
@@ -171,6 +177,7 @@ def category(request, foo):
         messages.success(request, ('Category does not exists'))
         return redirect('store:home')
 
+@Authorization.authorize_server(name='category_summary')
 def category_summary(request):
     categories = Category.objects.all()
     context = {

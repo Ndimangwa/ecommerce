@@ -6,8 +6,10 @@ from store.models import Profile
 from .forms import ShippingForm, PaymentForm
 from django.contrib import messages
 import datetime
+from authorization.authorize import Authorization
 
 #shipping status
+@Authorization.authorize_server(name='update_shipping_status')
 def update_shipping_status(request):
     if request.user.is_authenticated and request.user.is_superuser and request.method == 'POST':
         status = request.POST['shipping_status']
@@ -28,7 +30,9 @@ def update_shipping_status(request):
     else:
         messages.success(request, ('Access Denied'))
         return redirect('store:home')  
+
 #orders
+@Authorization.authorize_server(name='orders')
 def orders(request, pk):
     if request.user.is_authenticated and request.user.is_superuser:
         #Get Order
@@ -45,6 +49,7 @@ def orders(request, pk):
         return redirect('store:home') 
 
 #Shipped Dashboard
+@Authorization.authorize_server(name='shipped_dash')
 def shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped=True)
@@ -54,6 +59,7 @@ def shipped_dash(request):
         return redirect('store:home')
 
 #Un-Shipped Dashboard
+@Authorization.authorize_server(name='not_shipped_dash')
 def not_shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped=False)
@@ -63,10 +69,12 @@ def not_shipped_dash(request):
         return redirect('store:home')
 
 # Create your views here.
+@Authorization.authorize_server(name='payment_success')
 def payment_success(request):
     return render(request, 'payment/payment_success.html', {})
 
 # Checkout
+@Authorization.authorize_server(name='checkout')
 def checkout(request):
     #get the cart
     cart = Cart(request)
@@ -98,6 +106,7 @@ def checkout(request):
     return render(request, 'payment/checkout.html', context)
 
 #Billing Info
+@Authorization.authorize_server(name='billing_info')
 def billing_info(request):
     if request.POST:
         #Data were submitted
@@ -139,6 +148,7 @@ def mark_empty(val):
 def clean_string(val):
     return val.replace("__MIMI_SIPATIKANI__iiii__\n", "")
 
+@Authorization.authorize_server(name='process_payment')
 def process_payment(request):
     if request.POST:
         #A -- get the cart ; Aim is just to get totals

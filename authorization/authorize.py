@@ -2,10 +2,14 @@ from django.shortcuts import redirect
 from .models import ContextManager, ContextLookup, ContextPosition
 
 AUTH_DECISION = {
-    'ALLOW' : 1,
     'DENY' : 0,
+    'ALLOW' : 1,
     'DO_NOT_CARE' : 2,
     'NO_ROLE' : 3,
+}
+AUTH_REVERSE_DECISION = {
+    0 : 'DENY',
+    1 : 'ALLOW',
 }
 
 class Authorization:
@@ -31,17 +35,31 @@ class Authorization:
             raise Exception("Unmatched Length")
         return int(symbolValue[offsetPos:offsetPos + 1:1])
         
-    def _system_auth_is_allowable_(trace_obj={}, **kwargs):
+    def _system_auth_if_no_rule_defined(trace_obj=None, **kwargs):
+        #if no rule
+        contextManager = ContextManager.objects.all()[0]
+        temp_obj = {'type': 'System'}
+        val = AUTH_DECISION['ALLOW'] if contextManager.defaultIfNoRule else AUTH_DECISION['DENY']
+        if trace_obj != None:
+            index = len(trace_obj)
+            temp_obj['action'] = val
+            temp_obj['message'] =  f"System Authorization : Applied Rule is not defined, the default rule is set to {AUTH_REVERSE_DECISION[val]}"
+            trace_obj[index] = temp_obj
+        return contextManager.defaultIfNoRule
+
+    def _system_auth_is_allowable_(trace_obj=None, **kwargs):
         #All Do not Cares
         contextManager = ContextManager.objects.all()[0]
         temp_obj = {'type': 'System'}
         val = AUTH_DECISION['ALLOW'] if contextManager.defaultXValue else AUTH_DECISION['DENY']
-        index = len(trace_obj)
-        temp_obj['action'] = val            
-        trace_obj[index] = temp_obj
+        if trace_obj != None:
+            index = len(trace_obj)
+            temp_obj['action'] = val 
+            temp_obj['message'] = f"System Authorization : Decision is not defined for the action, the default decision is set to {AUTH_REVERSE_DECISION[val]}"           
+            trace_obj[index] = temp_obj
         return contextManager.defaultXValue
 
-    def _group_auth_is_allowable_helper_(group, pos, trace_obj={}, **kwargs):
+    def _group_auth_is_allowable_helper_(group, pos, trace_obj=None, **kwargs):
         if group:
             temp_obj = {'type': 'Group', 'id': group.id}
             parent = group.parent
@@ -50,34 +68,42 @@ class Authorization:
                 #group hierarchy need to be handled prior final decision on DO_NOT_CARES
                 decision = Authorization._auth_get_context_decision_(group.role.context, pos)
                 if decision == AUTH_DECISION['ALLOW']:
-                    index = len(trace_obj)
-                    temp_obj['action'] = AUTH_DECISION['ALLOW']
-                    trace_obj[index] = temp_obj
+                    if trace_obj != None:
+                        index = len(trace_obj)
+                        temp_obj['action'] = AUTH_DECISION['ALLOW']
+                        temp_obj['message'] = 'Group Authorization : Allowed'
+                        trace_obj[index] = temp_obj
                     return True
                 elif decision == AUTH_DECISION['DENY']:
-                    index = len(trace_obj)
-                    temp_obj['action'] = AUTH_DECISION['DENY']
-                    trace_obj[index] = temp_obj
+                    if trace_obj != None:
+                        index = len(trace_obj)
+                        temp_obj['action'] = AUTH_DECISION['DENY']
+                        temp_obj['message'] = 'Group Authorization : Denied'
+                        trace_obj[index] = temp_obj
                     return False
                 else:
                     #Must be DoNotCare
-                    index = len(trace_obj)
-                    temp_obj['action'] = AUTH_DECISION['DO_NOT_CARE']
-                    trace_obj[index] = temp_obj
+                    if trace_obj != None:
+                        index = len(trace_obj)
+                        temp_obj['action'] = AUTH_DECISION['DO_NOT_CARE']
+                        temp_obj['message'] = 'Group Authorization : Do Not Care'
+                        trace_obj[index] = temp_obj
                     return Authorization._group_auth_is_allowable_helper_(parent, pos, trace_obj, **kwargs)
             else:
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['NO_ROLE']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['NO_ROLE']
+                    temp_obj['message'] = 'Group Authorization : No Role Defined'
+                    trace_obj[index] = temp_obj
                 return Authorization._group_auth_is_allowable_helper_(parent, pos, trace_obj, **kwargs)
         else:
             return Authorization._system_auth_is_allowable_(trace_obj, **kwargs)
 
-    def _group_auth_is_allowable_(user, pos, trace_obj={}, **kwargs):
+    def _group_auth_is_allowable_(user, pos, trace_obj=None, **kwargs):
         group = user.group
         return Authorization._group_auth_is_allowable_helper_(group, pos, trace_obj, **kwargs)
 
-    def _jobtitle_auth_is_allowable_(user, pos, trace_obj={}, **kwargs):
+    def _jobtitle_auth_is_allowable_(user, pos, trace_obj=None, **kwargs):
         jobtitle = user.job_title
         if not jobtitle:
             #We need to pass to group, user has no job_title
@@ -87,82 +113,96 @@ class Authorization:
             #decision 1=>ALLOW, 0 => DENY, 2 => DO_NOT_CARE
             decision = Authorization._auth_get_context_decision_(jobtitle.role.context, pos)
             if decision == AUTH_DECISION['ALLOW']:
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['ALLOW']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['ALLOW']
+                    temp_obj['message'] = 'JobTitle Authorization : Allowed'
+                    trace_obj[index] = temp_obj
                 return True
             elif decision == AUTH_DECISION['DENY']:
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['DENY']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['DENY']
+                    temp_obj['message'] = 'JobTitle Authorization : Denied'
+                    trace_obj[index] = temp_obj
                 return False
             else:
                 # Must be DoNotCare
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['DO_NOT_CARE']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['DO_NOT_CARE']
+                    temp_obj['message'] = 'JobTitle Authorization : Do Not Care'
+                    trace_obj[index] = temp_obj
                 return Authorization._group_auth_is_allowable_(user, pos, trace_obj, **kwargs)
         else:
             #We need to pass to group, user has a jobtitle with no roles
-            index = len(trace_obj)
-            temp_obj['action'] = AUTH_DECISION['NO_ROLE']
-            trace_obj[index] = temp_obj
+            if trace_obj != None:
+                index = len(trace_obj)
+                temp_obj['action'] = AUTH_DECISION['NO_ROLE']
+                temp_obj['message'] = 'JobTitle Authorization : No Role Defined'
+                trace_obj[index] = temp_obj
             return Authorization._group_auth_is_allowable_(user, pos, trace_obj, **kwargs)
         
-    def _user_auth_is_allowable_(user, pos, trace_obj={}, **kwargs):
+    def _user_auth_is_allowable_(user, pos, trace_obj=None, **kwargs):
         temp_obj = {'type': 'User', 'id': user.id}
         if user.role:
             #decision 1=>ALLOW, 0 => DENY, 2 => DO_NOT_CARE
             decision = Authorization._auth_get_context_decision_(user.role.context, pos)
             if decision == AUTH_DECISION['ALLOW']:
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['ALLOW']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['ALLOW']
+                    temp_obj['message'] = 'User Authorization : Allowed'
+                    trace_obj[index] = temp_obj
                 return True
             elif decision == AUTH_DECISION['DENY']:
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['DENY']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['DENY']
+                    temp_obj['message'] = 'User Authorization : Denied'
+                    trace_obj[index] = temp_obj
                 return False
             else:
                 #Must be DO_NOT_CARE
-                index = len(trace_obj)
-                temp_obj['action'] = AUTH_DECISION['DO_NOT_CARE']
-                trace_obj[index] = temp_obj
+                if trace_obj != None:
+                    index = len(trace_obj)
+                    temp_obj['action'] = AUTH_DECISION['DO_NOT_CARE']
+                    temp_obj['message'] = 'User Authorization : Do Not Care'
+                    trace_obj[index] = temp_obj
                 return Authorization._jobtitle_auth_is_allowable_(user, pos, trace_obj, **kwargs)
         else:
             #We need to move to job_title
-            index = len(trace_obj)
-            temp_obj['action'] = AUTH_DECISION['NO_ROLE']
-            trace_obj[index] = temp_obj
+            if trace_obj != None:
+                index = len(trace_obj)
+                temp_obj['action'] = AUTH_DECISION['NO_ROLE']
+                temp_obj['message'] = 'User Authorization : No Role Defined'
+                trace_obj[index] = temp_obj
             return Authorization._jobtitle_auth_is_allowable_(user, pos, trace_obj, **kwargs)
 
     ###ENTRY POINT###
-    def _auth_is_allowable_(user, opname, trace_obj={}, **kwargs):
+    def _auth_is_allowable_(user, opname, trace_obj=None, **kwargs):
         # trace_obj , initialize with {}
         temp_obj = {'type' : 'None'}
         # For Authenticated users only
         if not user.is_authenticated:
-            index = len(trace_obj)
-            temp_obj['message'] = 'USER IS NOT AUTHENTICATED'
-            temp_obj['action'] = AUTH_DECISION['DENY']
-            trace_obj[index] = temp_obj
+            if trace_obj != None:
+                index = len(trace_obj)
+                temp_obj['message'] = 'USER IS NOT AUTHENTICATED'
+                temp_obj['action'] = AUTH_DECISION['DENY']
+                trace_obj[index] = temp_obj
             return False
         #1. If superuser return True
         if user.is_superuser:
-            index = len(trace_obj)
-            temp_obj['message'] = 'IS SUPER USER'
-            temp_obj['action'] = AUTH_DECISION['ALLOW']
-            trace_obj[index] = temp_obj
+            if trace_obj != None:
+                index = len(trace_obj)
+                temp_obj['message'] = 'IS SUPER USER'
+                temp_obj['action'] = AUTH_DECISION['ALLOW']
+                trace_obj[index] = temp_obj
             return True
         #2. pos = Get Position of the opname
         contextPosition = ContextPosition.objects.filter(cName=opname)
         if not contextPosition:
-            index = len(trace_obj)
-            temp_obj['message'] = f"Rule : {opname} is not defined"
-            temp_obj['action'] = AUTH_DECISION['DENY']
-            trace_obj[index] = temp_obj
-            return False #No rule defined
+            return Authorization._system_auth_if_no_rule_defined(trace_obj, **kwargs)
         #3.Checking user roles
         return Authorization._user_auth_is_allowable_(user, contextPosition[0].cPosition, trace_obj, **kwargs)
     
@@ -189,7 +229,7 @@ class Authorization:
         def decorator(func):
             def wrapper(*args, **kwargs):
                 request = args[0]
-                trace_obj = {}
+                trace_obj = {0 : {'opname' : name}}
                 decision = Authorization._auth_is_allowable_(request.user, name, trace_obj, **kwargs)
                 print(trace_obj)
                 print("Decision is ", decision)

@@ -6,7 +6,8 @@ from django.dispatch import receiver
 
 # ContextManager
 class ContextManager(models.Model):
-    defaultXValue = models.BooleanField(unique=True, default=False)
+    defaultXValue = models.BooleanField(unique=True, default=True)
+    defaultIfNoRule = models.BooleanField(unique=True, default=True)
 
 # ContextLookup
 class ContextLookup(models.Model):
@@ -40,6 +41,9 @@ class Roles(models.Model):
 
     def __str__(self):
         return f"{self.role_name}"
+    
+    class Meta:
+        verbose_name_plural='Roles'
 
 class JobTitle(models.Model):
     job_name = models.CharField(max_length=64, blank=False, null=False, unique=True)

@@ -3,8 +3,10 @@ from django.http import JsonResponse
 from django.contrib import messages
 from store.models import Product
 from .cart import Cart
+from authorization.authorize import Authorization
 
 # Create your views here.
+@Authorization.authorize_server(name='cart_summary')
 def cart_summary(request):
     #get the cart
     cart = Cart(request)
@@ -22,6 +24,7 @@ def cart_summary(request):
     }
     return render(request, 'cart/cart_summary.html', context)
 
+@Authorization.authorize_server(name='cart_add')
 def cart_add(request):
     #get the cart
     cart = Cart(request)
@@ -45,6 +48,7 @@ def cart_add(request):
         messages.success(request, ('There were problem in adding a product'))
         return JsonResponse({'error' : '707', 'errormessage' : 'Could not get a valid action'})
 
+@Authorization.authorize_server(name='cart_delete')
 def cart_delete(request):
     cart = Cart(request)
     if request.POST.get('action') == 'post':
@@ -63,6 +67,7 @@ def cart_delete(request):
         #response
         return JsonResponse({'error' : '808', 'errormessage' : 'Could not get a valid action'})
 
+@Authorization.authorize_server(name='cart_update')
 def cart_update(request):
     cart = Cart(request)
 
