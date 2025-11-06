@@ -18,7 +18,7 @@ def home(request):
     products = Product.objects.all()
     return render(request, 'home.html', {'products' : products})
 
-@Authorization.authorize_server(name='search')
+#@Authorization.authorize_server(name='search')
 def search(request):
     #determine if form filled
     if request.method == "POST":
@@ -33,7 +33,7 @@ def search(request):
             return render(request, 'search.html', {'products' : products})
     return render(request, 'search.html', {})
 
-@Authorization.authorize_server(name='about')
+#Authorization.authorize_server(name='about')
 def about(request):
     return render(request, 'about.html', {})
 
@@ -151,7 +151,7 @@ def register_user(request):
     else:
         return render(request, 'register.html', {'form' : form })
     
-@Authorization.authorize_server(name='product')
+#@Authorization.authorize_server(name='product')
 def product(request, pk):
     product = Product.objects.get(id=pk)
     context = {
@@ -159,7 +159,7 @@ def product(request, pk):
     }
     return render(request, 'product.html', context)
 
-@Authorization.authorize_server(name='category')
+#@Authorization.authorize_server(name='category')
 def category(request, foo):
     #Replace the - with ' '
     foo = foo.replace('-', ' ')
@@ -177,7 +177,7 @@ def category(request, foo):
         messages.success(request, ('Category does not exists'))
         return redirect('store:home')
 
-@Authorization.authorize_server(name='category_summary')
+#@Authorization.authorize_server(name='category_summary')
 def category_summary(request):
     categories = Category.objects.all()
     context = {

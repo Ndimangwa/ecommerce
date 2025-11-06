@@ -1,9 +1,12 @@
 from pathlib import Path
 import os
-from decouple import config
-
+from dotenv import load_dotenv
+import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+#Load dotenv
+load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
@@ -16,7 +19,7 @@ SECRET_KEY = 'django-insecure-$5^poec)tjd-_pa+_js7lzy4zg-fm4qmtim=htxz*2-0&65qfq
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CSRF_TRUSTED_ORIGINS = []
 
 # Application definition
 
@@ -32,6 +35,7 @@ INSTALLED_APPS = [
     'cart.apps.CartConfig',
     'payment.apps.PaymentConfig',
     'authorization.apps.AuthorizationConfig',
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
@@ -42,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'django_project.urls'
@@ -70,19 +75,7 @@ WSGI_APPLICATION = 'django_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE' : 'django.db.backends.mysql',
-        'NAME' : config('DB_NAME'),
-        'USER' : config('DB_USER'),
-        'PASSWORD' : config('DB_PASSWORD'),
-        'HOST' : 'localhost',
-        'PORT' : '3306',
-        'OPTIONS' : {
-            'init_command':"SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 
 # User class
@@ -124,6 +117,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = ['static/']
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFileStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

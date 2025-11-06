@@ -3,7 +3,12 @@ from .models import ContextManager, ContextLookup, ContextPosition, Roles, Group
 
 # Register your models here.
 admin.site.register(ContextManager)
-admin.site.register(ContextLookup)
+
+class ContextLookupAdmin(admin.ModelAdmin):
+    model=ContextLookup
+    readonly_fields=['symbol', 'cvalue']
+admin.site.register(ContextLookup, ContextLookupAdmin)
+
 admin.site.register(ContextPosition)
 
 class RolesAdmin(admin.ModelAdmin):
