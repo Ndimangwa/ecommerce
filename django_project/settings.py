@@ -74,6 +74,7 @@ WSGI_APPLICATION = 'django_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+"""
 DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL_YOO'))
     #'default': {
@@ -84,6 +85,22 @@ DATABASES = {
     #    'HOST':'postgres.railway.internal',
     #    'PORT':'5432',
     #}
+}
+"""
+#Working with Database
+from urllib.parse import urlparse 
+DATABASE_URL = os.environ.get('DATABASE_URL')
+db_info = urlparse(DATABASE_URL)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'django_ecommerce',
+        'USER': db_info.username,
+        'PASSWORD': db_info.password,
+        'HOST': db_info.hostname,
+        'PORT': db_info.port,
+        'OPTIONS': {'sslmode': 'required'}
+    }
 }
 
 # User class
