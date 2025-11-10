@@ -18,8 +18,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ecommerce-production-bd66.up.railway.app', 'https://ecommerce-production-bd66.up.railway.app']
-CSRF_TRUSTED_ORIGINS = ['https://ecommerce-production-bd66.up.railway.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ecommerce-production-753f.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://ecommerce-production-753f.up.railway.app']
 
 # Application definition
 
