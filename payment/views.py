@@ -7,6 +7,11 @@ from .forms import ShippingForm, PaymentForm
 from django.contrib import messages
 import datetime
 from authorization.authorize import Authorization
+#PayPal Stuff
+from django.urls import reverse
+from paypal.standard.forms import PayPalPaymentsForm 
+from django.conf import settings
+import uuid # for generating unique order id
 
 #shipping status
 @Authorization.authorize_server(name='update_shipping_status')
@@ -73,6 +78,10 @@ def not_shipped_dash(request):
 def payment_success(request):
     return render(request, 'payment/payment_success.html', {})
 
+@Authorization.authorize_server(name='payment_failed')
+def payment_failed(request):
+    return render(request, 'payment/payment_failed.html', {})
+
 # Checkout
 @Authorization.authorize_server(name='checkout')
 def checkout(request):
@@ -135,6 +144,24 @@ def billing_info(request):
         #C -- billing_form , we need form forms.Form
         billing_form = PaymentForm()
         context['billing_form'] = billing_form
+        #D -- Apart from normal Payment form with credit cards
+        #       we also need PayPalPaymentsForm actual this is a button
+        host = request.get_host() #we need host so reverse can work
+        #paypal dictionary
+        paypal_dict = {
+            'business' : settings.PAYPAL_RECEIVER_EMAIL,
+            'amount' : totals,
+            'item_name': 'Book Order',
+            'no_shipping': '2',
+            'invoice': str(uuid.uuid4()),
+            'currency_code': 'USD', #You can do EUR etc, TZ/TZS I do not know
+            'notify_url' : 'https://{}{}'.format(host, reverse('paypal-ipn')),
+            'return_url' : 'https://{}{}'.format(host, reverse('payment:payment_success')),
+            'cancel_return' : 'https://{}{}'.format(host, reverse('payment:payment_failed')),
+        }
+        #Now pack paypal_form
+        paypal_form = PayPalPaymentsForm(initial=paypal_dict)
+        context['paypal_form'] = paypal_form
         return render(request, 'payment/billing_info.html', context)
     else:
        messages.success(request, ('Access Denied'))

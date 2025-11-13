@@ -1,0 +1,9 @@
+Personal:
+    Email : ndimangwa@zoomtong.com
+    Password : kengewamjini1234!
+    Initial Amount : $9000
+
+Business:
+    Email : business@darone.com
+    Password : kengewamjini1234!
+    Initial Amount : $38000
