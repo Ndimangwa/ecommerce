@@ -155,7 +155,7 @@ def billing_info(request):
             'no_shipping': '2',
             'invoice': str(uuid.uuid4()),
             'currency_code': 'USD', #You can do EUR etc, TZ/TZS I do not know
-            'notify_url' : 'https://{}{}'.format(host, reverse('paypal-ipn')),
+            'notify_url' : 'https://{}{}'.format(host, reverse('payment:paypal-ipn')),
             'return_url' : 'https://{}{}'.format(host, reverse('payment:payment_success')),
             'cancel_return' : 'https://{}{}'.format(host, reverse('payment:payment_failed')),
         }
