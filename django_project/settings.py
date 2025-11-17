@@ -7,7 +7,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 #Load dotenv
 #load_dotenv()
-
+LOCAL_CONNECT = False
+if LOCAL_CONNECT:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -91,7 +94,8 @@ DATABASES = {
 """
 #Working with Database
 from urllib.parse import urlparse 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+#Connecting within railway
+DATABASE_URL = os.environ.get('DATABASE_PUBLIC_URL') if LOCAL_CONNECT else os.environ.get('DATABASE_URL')
 db_info = urlparse(DATABASE_URL)
 DATABASES = {
     'default': {
