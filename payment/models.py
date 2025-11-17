@@ -30,10 +30,11 @@ def create_shipping_address(sender, instance, created, **kwargs):
         #User is Created
         user_shipping = ShippingAddress.objects.create(user=instance)
         user_shipping.save()
-        print(f"++++++++ Shipping Address for User : {instance.username} has been created successfull ++++++++")
+        #print(f"++++++++ Shipping Address for User : {instance.username} has been created successfull ++++++++")
     else:
         #User updated
-        print(f"++++++++ A User {instance.username} has been updated [ ShippingAddress has been signalled ] ++++++++")
+        #print(f"++++++++ A User {instance.username} has been updated [ ShippingAddress has been signalled ] ++++++++")
+        pass
 
 #Connecting now
 post_save.connect(create_shipping_address, sender=User)

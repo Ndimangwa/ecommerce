@@ -231,8 +231,8 @@ class Authorization:
                 request = args[0]
                 trace_obj = {0 : {'opname' : name}}
                 decision = Authorization._auth_is_allowable_(request.user, name, trace_obj, **kwargs)
-                print(trace_obj)
-                print("Decision is ", decision)
+                #print(trace_obj)
+                #print("Decision is ", decision)
                 if decision:
                     return func(*args, **kwargs)
                 else:
