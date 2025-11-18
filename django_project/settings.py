@@ -21,8 +21,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'zoomtong.com', 'ecommerce-production-753f.up.railway.app']
-CSRF_TRUSTED_ORIGINS = ['https://zoomtong.com', 'https://ecommerce-production-753f.up.railway.app']
+ALLOWED_HOSTS = ['gewgawed-unincorporated-hoa.ngrok-free.dev', 'localhost', '127.0.0.1', 'zoomtong.com', 'ecommerce-production-753f.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://gewgawed-unincorporated-hoa.ngrok-free.dev', 'https://zoomtong.com', 'https://ecommerce-production-753f.up.railway.app']
 
 # Application definition
 
