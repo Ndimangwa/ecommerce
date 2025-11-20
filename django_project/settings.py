@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 #Load dotenv
 #load_dotenv()
-LOCAL_CONNECT = True
+LOCAL_CONNECT = False
 if LOCAL_CONNECT:
     from dotenv import load_dotenv
     load_dotenv()
