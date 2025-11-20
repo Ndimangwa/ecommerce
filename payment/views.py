@@ -78,6 +78,11 @@ def not_shipped_dash(request):
 # Create your views here.
 @Authorization.authorize_server(name='payment_success')
 def payment_success(request):
+    #We need to clear session and clear old-cart
+    OrderManagement.clear_both_cart_session_as_well_as_db(request)
+    if request.GET:
+        #Trying to pull paypal stuff
+        pass
     return render(request, 'payment/payment_success.html', {})
 
 @Authorization.authorize_server(name='payment_failed')
@@ -181,18 +186,8 @@ def process_payment(request):
     if request.POST:
         #Initialize order
         OrderManagement.initialize_order(request)
-        #After order is created delete cart
-        for key in list(request.session.keys()):
-            if key == "session_key":
-                #delete the key
-                del request.session[key]
-        #We forgot items were saved permanetly in db
-        #in Profile.old_card
-        if request.user.is_authenticated:
-            current_user_profile = Profile.objects.get(user=request.user)
-            if current_user_profile:
-                current_user_profile.old_cart = ""
-                current_user_profile.save()
+        #Clearing Cart
+        OrderManagement.clear_both_cart_session_as_well_as_db(request)
         #feedback
         messages.success(request, ('Order Placed Successful'))
         return redirect('store:home')

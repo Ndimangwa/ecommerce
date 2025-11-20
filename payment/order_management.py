@@ -1,6 +1,7 @@
 from cart.cart import Cart
 from .forms import PaymentForm
 from .models import Order, OrderItem
+from store.models import Profile
 
 #Processing payment
 def mark_empty(val):
@@ -76,4 +77,23 @@ class OrderManagement:
                     client_order_item = OrderItem(**item_data)
                     client_order_item.save()
                     break
-        
+
+    def clear_cart_session(request):
+        for key in list(request.session.keys()):
+            if key == "session_key":
+                #delete the key
+                del request.session[key]
+
+    def clear_cart_in_db(request):
+        if request.user.is_authenticated:
+            current_user_profile = Profile.objects.get(user=request.user)
+            if current_user_profile:
+                current_user_profile.old_cart = ""
+                current_user_profile.save()
+
+    def clear_both_cart_session_as_well_as_db(request):
+        #After order is created delete cart
+        OrderManagement.clear_cart_session(request)
+        #We forgot items were saved permanetly in db
+        #in Profile.old_card
+        OrderManagement.clear_cart_in_db(request)
