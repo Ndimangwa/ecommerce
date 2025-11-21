@@ -1,21 +1,10 @@
 from django.shortcuts import redirect
 from .models import ContextManager, ContextLookup, ContextPosition
-
-AUTH_DECISION = {
-    'DENY' : 0,
-    'ALLOW' : 1,
-    'DO_NOT_CARE' : 2,
-    'NO_ROLE' : 3,
-}
-AUTH_REVERSE_DECISION = {
-    0 : 'DENY',
-    1 : 'ALLOW',
-}
+from .__authorization_constants__ import AUTH_DECISION, AUTH_REVERSE_DECISION, BLOCK_SIZE
 
 class Authorization:
     #Low level authorization
     def _auth_get_context_decision_(context, pos):
-        BLOCK_SIZE = 4
         actualPos = pos // BLOCK_SIZE
         offsetPos = pos % BLOCK_SIZE
         if actualPos >= len(context):
@@ -31,7 +20,7 @@ class Authorization:
         if not contextLookup:
             raise Exception("Failed to Selected between 'a' and 'A'")
         symbolValue = contextLookup.cvalue # ie 2222
-        if len(symbolValue) != 4:
+        if len(symbolValue) != BLOCK_SIZE:
             raise Exception("Unmatched Length")
         return int(symbolValue[offsetPos:offsetPos + 1:1])
         
