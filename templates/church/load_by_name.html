@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Header-->
+<header class="bg-dark py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">{{ church_name }}</h1>
+            <p class="lead fw-normal text-white-50 mb-0">My Church...</p>
+        </div>
+    </div>
+</header>
+<!-- Section-->
+<section class="py-5">
+    <!--I have a list in products variable -->
+    {% if list_of_names %}
+        <section class="body">
+            <form method="POST" action="{% url 'church:load_by_name' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="selected_name" class="form-label">Name (Jina) : </label>
+                    <select name="selected_name" id="selected_name" class="form-select" aria-label="Default select example">
+                        <option value="-1" selected>Open this select menu</option>
+                        {% for name in list_of_names %}
+                            <option value="{{name}}">{{name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+            </form>
+        </section>
+        <!--Position for this name-->
+        {% if list_of_positions %}
+        <section class="body my-3 px-25">
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">Position</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for position in list_of_positions %}
+                <tr>
+                    <td>{{ position }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+        </section>
+        {% endif %}
+    {% else %}
+        <section class="body">
+            <h1>We did not find names</h1>
+        </section>
+    {% endif %}
+</section>
+{% endblock %}
