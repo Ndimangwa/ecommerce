@@ -17,7 +17,12 @@
             <form method="POST" action="{% url 'church:load_by_name' %}">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label for="selected_name" class="form-label">Name (Jina) : </label>
+                    <label for="selected_name" class="form-label">Name (Jina 
+                        {% if selected_name %}
+                            = "{{ selected_name }}"
+                        {% endif %}
+                    ) : 
+                    </label>
                     <select name="selected_name" id="selected_name" class="form-select" aria-label="Default select example">
                         <option value="-1" selected>Open this select menu</option>
                         {% for name in list_of_names %}

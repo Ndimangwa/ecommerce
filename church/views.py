@@ -23,6 +23,7 @@ def load_by_name(request):
             selected_records = data[data['Jina']==selected_name]
             list_of_positions = selected_records['Nafasi'].tolist();
             list_of_positions.sort(key=str)
+            context['selected_name'] = selected_name
             context['list_of_positions'] = list_of_positions
     except FileNotFoundError:
         context['data'] = "File Not Found"
